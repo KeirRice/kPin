@@ -1,0 +1,20 @@
+{
+  "name": "kPins",
+  "version": "1.0.0",
+  "frameworks": "arduino",
+  "platforms" : "atmelavr",
+  "keywords": "pins, ports",
+  "description": "Wrapper on the Arduino Pin and Ports.",
+  "authors": [
+    {
+      "name": "Keir Rice",
+      "email": "KeirRice+Arduino@gmail.com",
+      "url": "https://github.com/KeirRice",
+      "maintainer": true
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KeirRice/kPins"
+  }
+}
