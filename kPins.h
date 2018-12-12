@@ -4,7 +4,7 @@
 *************************************************************/
 #pragma once
 
-namespace kPin{
+namespace kPins{
 
 	typedef volatile const uint8_t reg_r_t; /**< Read only 8-bit register (volatile const unsigned int) */
 	typedef volatile uint8_t reg_rw_t; 		/**< Read-Write 8-bit register (volatile unsigned int) */
@@ -44,7 +44,6 @@ namespace kPin{
 
 	class PortID {
 
-	private:
 		const uint8_t mPortNumber;
 
 		reg_ddr_t *mDDRPort;
@@ -89,129 +88,111 @@ namespace kPin{
 			(*mPort) = ((*mPort) & ~mask) | ((value << shift) & mask);
 		}
 
-		inline void pinMode(uint8_t mode, uint8_t mask=255){
-			switch(mode)
-			{
-				case INPUT:
-			        *mDDRPort &= ~mask;
-					break;
-				case INPUT_PULLUP:
-			        *mDDRPort &= ~mask;
-			        *mPort |= mask;
-					break;
-				case OUTPUT:
-			        *mDDRPort |= mask;
-					break;
-				default:
-					break;
-			}
-		}
-
 		void EnablePCInterupt(uint8_t portMask) const;
 		void DisablePCInterupt(uint8_t portMask) const;
 	};
 	typedef PortID PortID;
-	constexpr static const PortID PORT_A(1);
-	constexpr static const PortID PORT_B(2);
-	constexpr static const PortID PORT_C(3);
-	constexpr static const PortID PORT_D(4);
-	constexpr static const PortID PORT_E(5);
-	constexpr static const PortID PORT_F(6);
-	constexpr static const PortID PORT_G(7);
-	constexpr static const PortID PORT_H(8);
-	constexpr static const PortID PORT_J(10);
-	constexpr static const PortID PORT_K(11);
-	constexpr static const PortID PORT_L(12);
+	constexpr static const PortID PA(1);
+	constexpr static const PortID PB(2);
+	constexpr static const PortID PC(3);
+	constexpr static const PortID PD(4);
+	constexpr static const PortID PE(5);
+	constexpr static const PortID PF(6);
+	constexpr static const PortID PG(7);
+	constexpr static const PortID PH(8);
+	constexpr static const PortID PJ(10);
+	constexpr static const PortID PK(11);
+	constexpr static const PortID PL(12);
 
 	constexpr const PortID PROGMEM const_digital_pin_to_port_PGM[] = {
 		// PORTLIST		
 		// -------------------------------------------		
-		PORT_E	, // PE 0 ** 0 ** USART0_RX	
-		PORT_E	, // PE 1 ** 1 ** USART0_TX	
-		PORT_E	, // PE 4 ** 2 ** PWM2	
-		PORT_E	, // PE 5 ** 3 ** PWM3	
-		PORT_G	, // PG 5 ** 4 ** PWM4	
-		PORT_E	, // PE 3 ** 5 ** PWM5	
-		PORT_H	, // PH 3 ** 6 ** PWM6	
-		PORT_H	, // PH 4 ** 7 ** PWM7	
-		PORT_H	, // PH 5 ** 8 ** PWM8	
-		PORT_H	, // PH 6 ** 9 ** PWM9	
-		PORT_B	, // PB 4 ** 10 ** PWM10	
-		PORT_B	, // PB 5 ** 11 ** PWM11	
-		PORT_B	, // PB 6 ** 12 ** PWM12	
-		PORT_B	, // PB 7 ** 13 ** PWM13	
-		PORT_J	, // PJ 1 ** 14 ** USART3_TX	
-		PORT_J	, // PJ 0 ** 15 ** USART3_RX
-		PORT_H	, // PH 1 ** 16 ** USART2_TX	
-		PORT_H	, // PH 0 ** 17 ** USART2_RX	
-		PORT_D	, // PD 3 ** 18 ** USART1_TX	
-		PORT_D	, // PD 2 ** 19 ** USART1_RX	
-		PORT_D	, // PD 1 ** 20 ** I2C_SDA	
-		PORT_D	, // PD 0 ** 21 ** I2C_SCL	
-		PORT_A	, // PA 0 ** 22 ** D22	
-		PORT_A	, // PA 1 ** 23 ** D23	
-		PORT_A	, // PA 2 ** 24 ** D24	
-		PORT_A	, // PA 3 ** 25 ** D25	
-		PORT_A	, // PA 4 ** 26 ** D26	
-		PORT_A	, // PA 5 ** 27 ** D27	
-		PORT_A	, // PA 6 ** 28 ** D28	
-		PORT_A	, // PA 7 ** 29 ** D29	
-		PORT_C	, // PC 7 ** 30 ** D30	
-		PORT_C	, // PC 6 ** 31 ** D31	
-		PORT_C	, // PC 5 ** 32 ** D32	
-		PORT_C	, // PC 4 ** 33 ** D33	
-		PORT_C	, // PC 3 ** 34 ** D34	
-		PORT_C	, // PC 2 ** 35 ** D35	
-		PORT_C	, // PC 1 ** 36 ** D36	
-		PORT_C	, // PC 0 ** 37 ** D37	
-		PORT_D	, // PD 7 ** 38 ** D38	
-		PORT_G	, // PG 2 ** 39 ** D39	
-		PORT_G	, // PG 1 ** 40 ** D40	
-		PORT_G	, // PG 0 ** 41 ** D41	
-		PORT_L	, // PL 7 ** 42 ** D42	
-		PORT_L	, // PL 6 ** 43 ** D43	
-		PORT_L	, // PL 5 ** 44 ** D44	
-		PORT_L	, // PL 4 ** 45 ** D45	
-		PORT_L	, // PL 3 ** 46 ** D46	
-		PORT_L	, // PL 2 ** 47 ** D47	
-		PORT_L	, // PL 1 ** 48 ** D48	
-		PORT_L	, // PL 0 ** 49 ** D49	
-		PORT_B	, // PB 3 ** 50 ** SPI_MISO	
-		PORT_B	, // PB 2 ** 51 ** SPI_MOSI	
-		PORT_B	, // PB 1 ** 52 ** SPI_SCK	
-		PORT_B	, // PB 0 ** 53 ** SPI_SS	
-		PORT_F	, // PF 0 ** 54 ** A0	
-		PORT_F	, // PF 1 ** 55 ** A1	
-		PORT_F	, // PF 2 ** 56 ** A2	
-		PORT_F	, // PF 3 ** 57 ** A3	
-		PORT_F	, // PF 4 ** 58 ** A4	
-		PORT_F	, // PF 5 ** 59 ** A5	
-		PORT_F	, // PF 6 ** 60 ** A6	
-		PORT_F	, // PF 7 ** 61 ** A7	
-		PORT_K	, // PK 0 ** 62 ** A8	
-		PORT_K	, // PK 1 ** 63 ** A9	
-		PORT_K	, // PK 2 ** 64 ** A10	
-		PORT_K	, // PK 3 ** 65 ** A11	
-		PORT_K	, // PK 4 ** 66 ** A12	
-		PORT_K	, // PK 5 ** 67 ** A13	
-		PORT_K	, // PK 6 ** 68 ** A14	
-		PORT_K	, // PK 7 ** 69 ** A15	
-		PORT_J	, // PJ 2 ** 70 ** D70
-		PORT_J	, // PJ 3 ** 71 ** D71
-		PORT_J	, // PJ 4 ** 72 ** D72
-		PORT_J	, // PJ 5 ** 73 ** D73
-		PORT_J	, // PJ 6 ** 74 ** D74
-		PORT_J	, // PJ 7 ** 75 ** D75
-		PORT_H	, // PH 2 ** 76 ** D76
-		PORT_H	, // PH 7 ** 77 ** D77
-		PORT_G	, // PG 3 ** 78 ** D78
-		PORT_G	, // PG 4 ** 79 ** D79
-		PORT_E	, // PE 2 ** 80 ** D80
-		PORT_E	, // PE 6 ** 81 ** D81
-		PORT_E	, // PE 7 ** 82 ** D82
-		PORT_D	, // PD 4 ** 83 ** D83
-		PORT_D	, // PD 5 ** 84 ** D84
-		PORT_D	, // PD 6 ** 85 ** D85
+		PE	, // PE 0 ** 0 ** USART0_RX	
+		PE	, // PE 1 ** 1 ** USART0_TX	
+		PE	, // PE 4 ** 2 ** PWM2	
+		PE	, // PE 5 ** 3 ** PWM3	
+		PG	, // PG 5 ** 4 ** PWM4	
+		PE	, // PE 3 ** 5 ** PWM5	
+		PH	, // PH 3 ** 6 ** PWM6	
+		PH	, // PH 4 ** 7 ** PWM7	
+		PH	, // PH 5 ** 8 ** PWM8	
+		PH	, // PH 6 ** 9 ** PWM9	
+		PB	, // PB 4 ** 10 ** PWM10	
+		PB	, // PB 5 ** 11 ** PWM11	
+		PB	, // PB 6 ** 12 ** PWM12	
+		PB	, // PB 7 ** 13 ** PWM13	
+		PJ	, // PJ 1 ** 14 ** USART3_TX	
+		PJ	, // PJ 0 ** 15 ** USART3_RX
+		PH	, // PH 1 ** 16 ** USART2_TX	
+		PH	, // PH 0 ** 17 ** USART2_RX	
+		PD	, // PD 3 ** 18 ** USART1_TX	
+		PD	, // PD 2 ** 19 ** USART1_RX	
+		PD	, // PD 1 ** 20 ** I2C_SDA	
+		PD	, // PD 0 ** 21 ** I2C_SCL	
+		PA	, // PA 0 ** 22 ** D22	
+		PA	, // PA 1 ** 23 ** D23	
+		PA	, // PA 2 ** 24 ** D24	
+		PA	, // PA 3 ** 25 ** D25	
+		PA	, // PA 4 ** 26 ** D26	
+		PA	, // PA 5 ** 27 ** D27	
+		PA	, // PA 6 ** 28 ** D28	
+		PA	, // PA 7 ** 29 ** D29	
+		PC	, // PC 7 ** 30 ** D30	
+		PC	, // PC 6 ** 31 ** D31	
+		PC	, // PC 5 ** 32 ** D32	
+		PC	, // PC 4 ** 33 ** D33	
+		PC	, // PC 3 ** 34 ** D34	
+		PC	, // PC 2 ** 35 ** D35	
+		PC	, // PC 1 ** 36 ** D36	
+		PC	, // PC 0 ** 37 ** D37	
+		PD	, // PD 7 ** 38 ** D38	
+		PG	, // PG 2 ** 39 ** D39	
+		PG	, // PG 1 ** 40 ** D40	
+		PG	, // PG 0 ** 41 ** D41	
+		PL	, // PL 7 ** 42 ** D42	
+		PL	, // PL 6 ** 43 ** D43	
+		PL	, // PL 5 ** 44 ** D44	
+		PL	, // PL 4 ** 45 ** D45	
+		PL	, // PL 3 ** 46 ** D46	
+		PL	, // PL 2 ** 47 ** D47	
+		PL	, // PL 1 ** 48 ** D48	
+		PL	, // PL 0 ** 49 ** D49	
+		PB	, // PB 3 ** 50 ** SPI_MISO	
+		PB	, // PB 2 ** 51 ** SPI_MOSI	
+		PB	, // PB 1 ** 52 ** SPI_SCK	
+		PB	, // PB 0 ** 53 ** SPI_SS	
+		PF	, // PF 0 ** 54 ** A0	
+		PF	, // PF 1 ** 55 ** A1	
+		PF	, // PF 2 ** 56 ** A2	
+		PF	, // PF 3 ** 57 ** A3	
+		PF	, // PF 4 ** 58 ** A4	
+		PF	, // PF 5 ** 59 ** A5	
+		PF	, // PF 6 ** 60 ** A6	
+		PF	, // PF 7 ** 61 ** A7	
+		PK	, // PK 0 ** 62 ** A8	
+		PK	, // PK 1 ** 63 ** A9	
+		PK	, // PK 2 ** 64 ** A10	
+		PK	, // PK 3 ** 65 ** A11	
+		PK	, // PK 4 ** 66 ** A12	
+		PK	, // PK 5 ** 67 ** A13	
+		PK	, // PK 6 ** 68 ** A14	
+		PK	, // PK 7 ** 69 ** A15	
+		PJ	, // PJ 2 ** 70 ** D70
+		PJ	, // PJ 3 ** 71 ** D71
+		PJ	, // PJ 4 ** 72 ** D72
+		PJ	, // PJ 5 ** 73 ** D73
+		PJ	, // PJ 6 ** 74 ** D74
+		PJ	, // PJ 7 ** 75 ** D75
+		PH	, // PH 2 ** 76 ** D76
+		PH	, // PH 7 ** 77 ** D77
+		PG	, // PG 3 ** 78 ** D78
+		PG	, // PG 4 ** 79 ** D79
+		PE	, // PE 2 ** 80 ** D80
+		PE	, // PE 6 ** 81 ** D81
+		PE	, // PE 7 ** 82 ** D82
+		PD	, // PD 4 ** 83 ** D83
+		PD	, // PD 5 ** 84 ** D84
+		PD	, // PD 6 ** 85 ** D85
 	};
 
 	class PinID {

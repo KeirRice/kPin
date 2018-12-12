@@ -3,24 +3,24 @@
   All the pins.
 *************************************************************/
 #include "Arduino.h"
-#include "kPin.h"
+#include "kPins.h"
 
-namespace kPin{
+namespace kPins{
 
 	void PortID::EnablePCInterupt(uint8_t portMask) const {
 		switch (mPortNumber){
-			case PORT_B:
+			case PB:
 			PCICR |= 0b00000001;
 			PCMSK0 |= portMask;
 			break;
 
-			case PORT_E:
-			case PORT_J:
+			case PE:
+			case PJ:
 			PCICR |= 0b00000010;
 			PCMSK1 |= portMask;
 			break;
 
-			case PORT_K:
+			case PK:
 			PCICR |= 0b00000100;
 			PCMSK2 |= portMask;
 			break;
@@ -31,18 +31,18 @@ namespace kPin{
 	}
 	void PortID::DisablePCInterupt(uint8_t portMask) const {
 		switch (mPortNumber){
-			case PORT_B:
+			case PB:
 			PCMSK0 &= ~portMask;
 			if (PCMSK0 == 0) { PCICR &= ~0b00000001; };
 			break;
 
-			case PORT_E:
-			case PORT_J:
+			case PE:
+			case PJ:
 			PCMSK1 &= ~portMask;
 			if (PCMSK1 == 0) { PCICR &= ~0b00000010; };
 			break;
 
-			case PORT_K:
+			case PK:
 			PCMSK2 &= ~portMask;
 			if (PCMSK2 == 0) { PCICR &= ~0b00000100; };
 			break;
