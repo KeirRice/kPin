@@ -3,9 +3,9 @@
   All the pins.
 *************************************************************/
 #include "Arduino.h"
-#include "kPins.h"
+#include "kPin.h"
 
-namespace kPins{
+namespace kPin{
 
 	void PortID::EnablePCInterupt(uint8_t portMask) const {
 		switch (mPortNumber){
