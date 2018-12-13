@@ -16,33 +16,13 @@ namespace kPin{
 	typedef reg_rw_t reg_port_t;  // Data Register
 	typedef reg_r_t reg_pin_t;  // Input Pins Register
 
-
-	constexpr const uint8_t PROGMEM const_port_to_mode_PGM[] = {
-		NOT_A_PORT,
-		NOT_A_PORT,
-		&DDRB,
-		&DDRC,
-		&DDRD,
-	};
-
-	constexpr const uint8_t PROGMEM const_port_to_output_PGM[] = {
-		NOT_A_PORT,
-		NOT_A_PORT,
-		&PORTB,
-		&PORTC,
-		&PORTD,
-	};
-
-	constexpr const uint8_t PROGMEM const_port_to_input_PGM[] = {
-		NOT_A_PORT,
-		NOT_A_PORT,
-		&PINB,
-		&PINC,
-		&PIND,
-	};
-
-
 	class PortID {
+		/*PortID can not have a constexpr as the memory address get reduced to int values and we would need
+		reinterpret_cast support to cast them back into something useful. 
+
+		If we really wanted to have mPortNumber avaiable as constexpr we would need to split the class and
+		attach the memory pointers at runtime.
+		*/
 
 		const uint8_t mPortNumber;
 
@@ -52,23 +32,22 @@ namespace kPin{
 
 	public:
 
-		constexpr PortID(const uint8_t port) : 
-		mPortNumber(port),
-		mDDRPort(&const_port_to_mode_PGM[port]),
-		mPort(&const_port_to_output_PGM[port]),
-		mPin(&const_port_to_input_PGM[port])
-		{}
-		constexpr PortID(const PortID &obj) :
-		mPortNumber(obj.mPortNumber),
-		mDDRPort(obj.mDDRPort),
-		mPort(obj.mPort),
-		mPin(obj.mPin) {}
+		PortID(const uint8_t port_number, reg_ddr_t *ddr, reg_port_t *port, reg_pin_t *pin) : 
+			mPortNumber(port_number),
+			mDDRPort(ddr),
+			mPort(port),
+			mPin(pin) {}
+		PortID(const PortID &obj) :
+			mPortNumber(obj.mPortNumber),
+			mDDRPort(obj.mDDRPort),
+			mPort(obj.mPort),
+			mPin(obj.mPin) {}
 
-		constexpr uint8_t port() const {
+		uint8_t port() const {
 			return mPortNumber;
 		}
 
-		constexpr operator uint8_t() const {
+		operator uint8_t() const {
 			return mPortNumber;
 		}
 
@@ -88,23 +67,26 @@ namespace kPin{
 			(*mPort) = ((*mPort) & ~mask) | ((value << shift) & mask);
 		}
 
+		void pinMode(uint8_t /*mode*/, uint8_t /*mask*/){};
+
 		void EnablePCInterupt(uint8_t portMask) const;
 		void DisablePCInterupt(uint8_t portMask) const;
 	};
-	typedef PortID PortID;
-	constexpr static const PortID PORT_A(1);
-	constexpr static const PortID PORT_B(2);
-	constexpr static const PortID PORT_C(3);
-	constexpr static const PortID PORT_D(4);
-	constexpr static const PortID PORT_E(5);
-	constexpr static const PortID PORT_F(6);
-	constexpr static const PortID PORT_G(7);
-	constexpr static const PortID PORT_H(8);
-	constexpr static const PortID PORT_J(10);
-	constexpr static const PortID PORT_K(11);
-	constexpr static const PortID PORT_L(12);
 
-	constexpr const PortID PROGMEM const_digital_pin_to_port_PGM[] = {
+	static const PortID PORT_A(1, &DDRA, &DDRA, &DDRA);
+	static const PortID PORT_B(2, &DDRB, &DDRB, &DDRB);
+	static const PortID PORT_C(3, &DDRC, &DDRC, &DDRC);
+	static const PortID PORT_D(4, &DDRD, &DDRD, &DDRD);
+	static const PortID PORT_E(5, &DDRE, &DDRE, &DDRE);
+	static const PortID PORT_F(6, &DDRF, &DDRF, &DDRF);
+	static const PortID PORT_G(7, &DDRG, &DDRG, &DDRG);
+	static const PortID PORT_H(8, &DDRH, &DDRH, &DDRH);
+	// TODO: Check what's up with I?
+	static const PortID PORT_J(10, &DDRJ, &DDRJ, &DDRJ);
+	static const PortID PORT_K(11, &DDRK, &DDRK, &DDRK);
+	static const PortID PORT_L(12, &DDRL, &DDRL, &DDRL);
+
+	const PortID PROGMEM const_digital_pin_to_port_PGM[] = {
 		// PORTLIST		
 		// -------------------------------------------		
 		PORT_E	, // PE 0 ** 0 ** USART0_RX	
@@ -198,8 +180,8 @@ namespace kPin{
 	class PinID {
 
 	public:
-		constexpr PinID(const uint8_t pin) : mPin(pin), mPort(const_digital_pin_to_port_PGM[pin]) {}
-		constexpr PinID(const PinID &obj) : mPin(obj.mPin), mPort(obj.mPort) {}
+		constexpr PinID(const uint8_t pin) : mPin(pin) {}
+		constexpr PinID(const PinID &obj) : mPin(obj.mPin) {}
 
 		constexpr uint8_t pin() const {
 			return mPin;
@@ -222,16 +204,15 @@ namespace kPin{
 			return ::digitalWrite(mPin, value);
 		}
 
-		const uint8_t PortMask() const{
+		uint8_t PortMask() const{
 			return digitalPinToBitMask(mPin);
 		}
 
 		const PortID Port() const{
-			return mPort;
+			return const_digital_pin_to_port_PGM[mPin];
 		}
 
 		const uint8_t mPin;
-		const PortID &mPort;
 	};
 
 
