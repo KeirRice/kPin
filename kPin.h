@@ -5,234 +5,117 @@
 #pragma once
 
 namespace kPin{
-
+	/*
+	*	Types
+	*/
 	typedef volatile const uint8_t reg_r_t; /**< Read only 8-bit register (volatile const unsigned int) */
 	typedef volatile uint8_t reg_rw_t; 		/**< Read-Write 8-bit register (volatile unsigned int) */
-	
-	typedef volatile reg_rw_t *port_ptr_t;
-	
-	typedef reg_rw_t port_t;
+		
 	typedef reg_rw_t reg_ddr_t;  // Data Direction Register
 	typedef reg_rw_t reg_port_t;  // Data Register
 	typedef reg_r_t reg_pin_t;  // Input Pins Register
 
+	/*
+	*	PortID is for working with an entire port at once.
+	*/
 	class PortID {
-		/*PortID can not have a constexpr as the memory address get reduced to int values and we would need
-		reinterpret_cast support to cast them back into something useful. 
+		public:
 
-		If we really wanted to have mPortNumber avaiable as constexpr we would need to split the class and
-		attach the memory pointers at runtime.
-		*/
+			constexpr PortID(const uint8_t port_number) : mPortNumber(port_number) {}
+			constexpr PortID(const PortID &obj) :	mPortNumber(obj.mPortNumber) {}
 
-		const uint8_t mPortNumber;
+			// The port number of this class
+			uint8_t port() const;
+			constexpr operator uint8_t() const {return mPortNumber;}
 
-		reg_ddr_t *mDDRPort;
-		reg_port_t *mPort;
-		const reg_pin_t *mPin;
+			// Read values of the port
+			int digitalRead() const;
+			int digitalRead(uint8_t mask, uint8_t shift=0);
 
-	public:
+			// Write values to the port
+			void digitalWrite(uint8_t value) const;
+			void digitalWrite(uint8_t value, uint8_t mask, uint8_t shift=0);
 
-		PortID(const uint8_t port_number, reg_ddr_t *ddr, reg_port_t *port, reg_pin_t *pin) : 
-			mPortNumber(port_number),
-			mDDRPort(ddr),
-			mPort(port),
-			mPin(pin) {}
-		PortID(const PortID &obj) :
-			mPortNumber(obj.mPortNumber),
-			mDDRPort(obj.mDDRPort),
-			mPort(obj.mPort),
-			mPin(obj.mPin) {}
+			// Set the mode of the port
+			void pinMode(uint8_t /*mode*/, uint8_t /*mask*/){};  // TODO
 
-		uint8_t port() const {
-			return mPortNumber;
-		}
+			// Set pin change interupt flags
+			void EnablePCInterupt(uint8_t portMask) const;
+			void DisablePCInterupt(uint8_t portMask) const;
 
-		operator uint8_t() const {
-			return mPortNumber;
-		}
+		private:
+			const uint8_t mPortNumber;
 
-		inline uint8_t digitalRead() const {
-			return (*mPin);
-		}
-		inline uint8_t digitalRead(uint8_t mask, uint8_t shift=0) const {
-			// Read the masked bits. Use shift value to align the results to LSB end.
-			return ((*mPin) & mask) >> shift;
-		}
-		inline void digitalWrite(uint8_t value) const {
-			(*mPort) = value;
-		}
-		inline void digitalWrite(uint8_t value, uint8_t mask, uint8_t shift=0) const {
-			// Write the value into the masked bits.
-			// Use shift to align value LSB with the start of the mask area.
-			(*mPort) = ((*mPort) & ~mask) | ((value << shift) & mask);
-		}
-
-		void pinMode(uint8_t /*mode*/, uint8_t /*mask*/){};
-
-		void EnablePCInterupt(uint8_t portMask) const;
-		void DisablePCInterupt(uint8_t portMask) const;
+			reg_ddr_t *DDR() const;
+			reg_port_t *PORT() const;
+			reg_pin_t *PIN() const;
 	};
+	typedef PortID PortID;
 
-	static const PortID PORT_A(1, &DDRA, &DDRA, &DDRA);
-	static const PortID PORT_B(2, &DDRB, &DDRB, &DDRB);
-	static const PortID PORT_C(3, &DDRC, &DDRC, &DDRC);
-	static const PortID PORT_D(4, &DDRD, &DDRD, &DDRD);
-	static const PortID PORT_E(5, &DDRE, &DDRE, &DDRE);
-	static const PortID PORT_F(6, &DDRF, &DDRF, &DDRF);
-	static const PortID PORT_G(7, &DDRG, &DDRG, &DDRG);
-	static const PortID PORT_H(8, &DDRH, &DDRH, &DDRH);
+	constexpr static const PortID PORT_A(1);
+	constexpr static const PortID PORT_B(2);
+	constexpr static const PortID PORT_C(3);
+	constexpr static const PortID PORT_D(4);
+	constexpr static const PortID PORT_E(5);
+	constexpr static const PortID PORT_F(6);
+	constexpr static const PortID PORT_G(7);
+	constexpr static const PortID PORT_H(8);
 	// TODO: Check what's up with I?
-	static const PortID PORT_J(10, &DDRJ, &DDRJ, &DDRJ);
-	static const PortID PORT_K(11, &DDRK, &DDRK, &DDRK);
-	static const PortID PORT_L(12, &DDRL, &DDRL, &DDRL);
+	constexpr static const PortID PORT_J(10);
+	constexpr static const PortID PORT_K(11);
+	constexpr static const PortID PORT_L(12);
 
-	const PortID PROGMEM const_digital_pin_to_port_PGM[] = {
-		// PORTLIST		
-		// -------------------------------------------		
-		PORT_E	, // PE 0 ** 0 ** USART0_RX	
-		PORT_E	, // PE 1 ** 1 ** USART0_TX	
-		PORT_E	, // PE 4 ** 2 ** PWM2	
-		PORT_E	, // PE 5 ** 3 ** PWM3	
-		PORT_G	, // PG 5 ** 4 ** PWM4	
-		PORT_E	, // PE 3 ** 5 ** PWM5	
-		PORT_H	, // PH 3 ** 6 ** PWM6	
-		PORT_H	, // PH 4 ** 7 ** PWM7	
-		PORT_H	, // PH 5 ** 8 ** PWM8	
-		PORT_H	, // PH 6 ** 9 ** PWM9	
-		PORT_B	, // PB 4 ** 10 ** PWM10	
-		PORT_B	, // PB 5 ** 11 ** PWM11	
-		PORT_B	, // PB 6 ** 12 ** PWM12	
-		PORT_B	, // PB 7 ** 13 ** PWM13	
-		PORT_J	, // PJ 1 ** 14 ** USART3_TX	
-		PORT_J	, // PJ 0 ** 15 ** USART3_RX
-		PORT_H	, // PH 1 ** 16 ** USART2_TX	
-		PORT_H	, // PH 0 ** 17 ** USART2_RX	
-		PORT_D	, // PD 3 ** 18 ** USART1_TX	
-		PORT_D	, // PD 2 ** 19 ** USART1_RX	
-		PORT_D	, // PD 1 ** 20 ** I2C_SDA	
-		PORT_D	, // PD 0 ** 21 ** I2C_SCL	
-		PORT_A	, // PA 0 ** 22 ** D22	
-		PORT_A	, // PA 1 ** 23 ** D23	
-		PORT_A	, // PA 2 ** 24 ** D24	
-		PORT_A	, // PA 3 ** 25 ** D25	
-		PORT_A	, // PA 4 ** 26 ** D26	
-		PORT_A	, // PA 5 ** 27 ** D27	
-		PORT_A	, // PA 6 ** 28 ** D28	
-		PORT_A	, // PA 7 ** 29 ** D29	
-		PORT_C	, // PC 7 ** 30 ** D30	
-		PORT_C	, // PC 6 ** 31 ** D31	
-		PORT_C	, // PC 5 ** 32 ** D32	
-		PORT_C	, // PC 4 ** 33 ** D33	
-		PORT_C	, // PC 3 ** 34 ** D34	
-		PORT_C	, // PC 2 ** 35 ** D35	
-		PORT_C	, // PC 1 ** 36 ** D36	
-		PORT_C	, // PC 0 ** 37 ** D37	
-		PORT_D	, // PD 7 ** 38 ** D38	
-		PORT_G	, // PG 2 ** 39 ** D39	
-		PORT_G	, // PG 1 ** 40 ** D40	
-		PORT_G	, // PG 0 ** 41 ** D41	
-		PORT_L	, // PL 7 ** 42 ** D42	
-		PORT_L	, // PL 6 ** 43 ** D43	
-		PORT_L	, // PL 5 ** 44 ** D44	
-		PORT_L	, // PL 4 ** 45 ** D45	
-		PORT_L	, // PL 3 ** 46 ** D46	
-		PORT_L	, // PL 2 ** 47 ** D47	
-		PORT_L	, // PL 1 ** 48 ** D48	
-		PORT_L	, // PL 0 ** 49 ** D49	
-		PORT_B	, // PB 3 ** 50 ** SPI_MISO	
-		PORT_B	, // PB 2 ** 51 ** SPI_MOSI	
-		PORT_B	, // PB 1 ** 52 ** SPI_SCK	
-		PORT_B	, // PB 0 ** 53 ** SPI_SS	
-		PORT_F	, // PF 0 ** 54 ** A0	
-		PORT_F	, // PF 1 ** 55 ** A1	
-		PORT_F	, // PF 2 ** 56 ** A2	
-		PORT_F	, // PF 3 ** 57 ** A3	
-		PORT_F	, // PF 4 ** 58 ** A4	
-		PORT_F	, // PF 5 ** 59 ** A5	
-		PORT_F	, // PF 6 ** 60 ** A6	
-		PORT_F	, // PF 7 ** 61 ** A7	
-		PORT_K	, // PK 0 ** 62 ** A8	
-		PORT_K	, // PK 1 ** 63 ** A9	
-		PORT_K	, // PK 2 ** 64 ** A10	
-		PORT_K	, // PK 3 ** 65 ** A11	
-		PORT_K	, // PK 4 ** 66 ** A12	
-		PORT_K	, // PK 5 ** 67 ** A13	
-		PORT_K	, // PK 6 ** 68 ** A14	
-		PORT_K	, // PK 7 ** 69 ** A15	
-		PORT_J	, // PJ 2 ** 70 ** D70
-		PORT_J	, // PJ 3 ** 71 ** D71
-		PORT_J	, // PJ 4 ** 72 ** D72
-		PORT_J	, // PJ 5 ** 73 ** D73
-		PORT_J	, // PJ 6 ** 74 ** D74
-		PORT_J	, // PJ 7 ** 75 ** D75
-		PORT_H	, // PH 2 ** 76 ** D76
-		PORT_H	, // PH 7 ** 77 ** D77
-		PORT_G	, // PG 3 ** 78 ** D78
-		PORT_G	, // PG 4 ** 79 ** D79
-		PORT_E	, // PE 2 ** 80 ** D80
-		PORT_E	, // PE 6 ** 81 ** D81
-		PORT_E	, // PE 7 ** 82 ** D82
-		PORT_D	, // PD 4 ** 83 ** D83
-		PORT_D	, // PD 5 ** 84 ** D84
-		PORT_D	, // PD 6 ** 85 ** D85
-	};
 
+	/*
+	*	PinID is for working with indervidual pins.
+	*/
 	class PinID {
+		public:
+			constexpr PinID(const uint8_t pin) : mPin(pin) {}
+			constexpr PinID(const PinID &obj) : mPin(obj.mPin) {}
 
-	public:
-		constexpr PinID(const uint8_t pin) : mPin(pin) {}
-		constexpr PinID(const PinID &obj) : mPin(obj.mPin) {}
+			// The pin number of this class
+			constexpr uint8_t pin() const;
+			constexpr operator uint8_t() const {	return mPin; }
 
-		constexpr uint8_t pin() const {
-			return mPin;
-		}
+			// Convenience function for digitalRead
+			int digitalRead() const;
 
-		constexpr operator uint8_t() const {
-			return mPin;
-		}
+			// Convenience function for digitalWrite
+			void digitalWrite(const int value) const;
 
-	    template <class T>
-		inline void pinMode(T mode) const{
-			return ::pinMode(mPin, mode);
-		}
+			// Convenience function for pinMode
+		    void pinMode(int mode) const;
 
-		inline int digitalRead() const {
-			return ::digitalRead(mPin);
-		}
+			// The bit mask of this pin relative to it's unlaying port.
+			uint8_t PortMask() const;
 
-		inline void digitalWrite(const int value) const{
-			return ::digitalWrite(mPin, value);
-		}
+			// The PortID object for the unlaying port.
+			const PortID Port() const;
 
-		uint8_t PortMask() const{
-			return digitalPinToBitMask(mPin);
-		}
-
-		const PortID Port() const{
-			return const_digital_pin_to_port_PGM[mPin];
-		}
-
-		const uint8_t mPin;
+		private:
+			const uint8_t mPin;
 	};
-
-
-	class PinInt : public PinID {
-
-
-	public: 
-		constexpr PinInt(const uint8_t pin) : PinID(pin) {}
-		constexpr PinInt(const PinID &obj) : PinID(obj.mPin) {}
-
-		void EnablePCInterupt() const;
-
-		void DisablePCInterupt() const;
-
-	};
-
-
 	typedef PinID PinID;
 
-	// Arduino
+
+	/*
+	*	PinInt is for pins that support Pin Change interupts.
+	*/
+	class PinInt : public PinID {
+		public: 
+			constexpr PinInt(const uint8_t pin) : PinID(pin) {}
+			constexpr PinInt(const PinID &obj) : PinID(obj) {}
+
+			// Enable pin change interupts.
+			void EnablePCInterupt() const;
+			void DisablePCInterupt() const;
+	};
+	typedef PinID PinID;
+
+	/*
+	*	Labels for all the pins on the Mega
+	*/
 	constexpr static const PinID ARDUINO_D0(0),   ARDUINO_PE0(ARDUINO_D0);
 	constexpr static const PinID ARDUINO_D1(1),   ARDUINO_PE1(ARDUINO_D1);
 	constexpr static const PinID ARDUINO_D2(2),   ARDUINO_PE4(ARDUINO_D2);
