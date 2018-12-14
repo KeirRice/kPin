@@ -5,6 +5,11 @@
 #pragma once
 
 namespace kPin{
+
+	namespace utils{
+		uint8_t maskToShifter(uint8_t mask);
+	}
+
 	/*
 	*	Types
 	*/
@@ -96,6 +101,7 @@ namespace kPin{
 		private:
 			const uint8_t mPin;
 	};
+	typedef PinID PinIDT;
 	typedef PinID PinID;
 
 
@@ -111,7 +117,7 @@ namespace kPin{
 			void EnablePCInterupt() const;
 			void DisablePCInterupt() const;
 	};
-	typedef PinID PinID;
+	typedef PinInt PinInt;
 
 	/*
 	*	Labels for all the pins on the Mega
@@ -235,4 +241,81 @@ namespace kPin{
 	constexpr static const PinID ARDUINO_I2C_SDA(ARDUINO_D20);
 	constexpr static const PinID ARDUINO_I2C_SCL(ARDUINO_D21);
 
-}
+
+	namespace Group{
+		class PinsInterface {
+			public:
+				uint8_t mPinCount;
+				uint8_t pins[];
+
+				virtual int digitalRead();
+				virtual void digitalWrite(int /*value*/);
+				virtual void pinMode(int /*mode*/);
+		};
+
+		/*
+		*	Manage reading and writing blocks of bits to a single port.
+		*/
+		class Port : public PinsInterface {
+			PortID &mPort;
+
+			uint8_t mMask;
+			uint8_t mShift;
+			
+			public:
+				Port(PortID port, uint8_t mask, uint8_t shift=0) : mPort(port), mMask(mask), mShift(shift) {};
+
+				int digitalRead() override{
+					return mPort.digitalRead(mMask, mShift);
+				};
+				void digitalWrite(int value) override{
+					return mPort.digitalWrite(value, mMask, mShift);
+				};
+
+				void pinMode(int mode) override{
+					mPort.pinMode(mode, mMask);
+				};
+		};
+		
+		/*
+		*	Manage reading and writing blocks of bits spread across many pins.
+		*/
+
+		// First pin is the MSB, last pin is LSB
+		template<PinID*... Args>
+		class Pins : public PinsInterface {
+			uint8_t mPinCount = sizeof...(Args);
+			uint8_t pins[sizeof...(Args)] = {(Args)...};  
+
+			public:
+
+				Pins(){};
+
+				/* Digital write bits from the LSB end of value */
+				int digitalRead() override {
+					int value = 0;
+					for(uint8_t i=0; i < this->mPinCount; ++i){
+						value |= this->pins[i].digitalRead() << i;
+					}
+					return value;
+				};
+
+				/* Digital write bits from the LSB end of value */
+				void digitalWrite(int value) override {
+					// TODO: Check we are not off by one here...
+					for(uint8_t i=this->mPinCount; i > 0; --i){
+						this->pins[i].digitalWrite(value & (1 << i));
+					}
+					return value;
+				};
+
+				void pinMode(int mode) override {
+					for(uint8_t i=0; i < this->mPinCount; ++i){
+						::pinMode(this->pins[i], mode);
+					}
+				};
+		};
+
+	} // namespace kPin.Group
+
+} // namespace kPin
