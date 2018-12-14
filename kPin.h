@@ -251,6 +251,7 @@ namespace kPin{
 				virtual int digitalRead();
 				virtual void digitalWrite(int /*value*/);
 				virtual void pinMode(int /*mode*/);
+				virtual uint8_t getMask() {};
 		};
 
 		/*
@@ -265,15 +266,20 @@ namespace kPin{
 			public:
 				Port(PortID port, uint8_t mask, uint8_t shift=0) : mPort(port), mMask(mask), mShift(shift) {};
 
-				int digitalRead() override{
+				virtual int digitalRead() override{
 					return mPort.digitalRead(mMask, mShift);
 				};
-				void digitalWrite(int value) override{
+				
+				virtual void digitalWrite(int value) override{
 					return mPort.digitalWrite(value, mMask, mShift);
 				};
 
-				void pinMode(int mode) override{
+				virtual void pinMode(int mode) override{
 					mPort.pinMode(mode, mMask);
+				};
+
+				virtual uint8_t getMask() override{
+					return mMask;
 				};
 		};
 		
